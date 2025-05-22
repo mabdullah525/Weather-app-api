@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Weather App</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background: linear-gradient(to right, #83a4d4, #b6fbff);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+            text-align: center;
+            width: 300px;
+        }
+
+        select,
+        button {
+            padding: 10px;
+            width: 100%;
+            margin-top: 10px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            font-size: 16px;
+        }
+
+        #result {
+            margin-top: 20px;
+            font-size: 18px;
+            font-weight: bold;
+        }
+
+        #weather {
+            margin-top: 20px;
+            font-size: 20px;
+            font-weight: bold;
+        }
+
+        #weatherImage {
+            margin-top: 15px;
+            width: 200px;
+            height: 200px;
+            display: none;
+            margin: 20px auto;
+            display: block;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="container">
+        <h1>🌦️ Weather App</h1>
+        <h4>Select a countary</h4>
+
+        <select id="citySelect" onchange="checkWeather()">
+            <option value="">--Select Countary--</option>
+        </select>
+
+        <p id="result"></p>
+        <img id="weatherImage" />
+        <p id="weather"></p>
+    </div>
+
+    <script>
+        const apiKey = "fb382d97a303702e873d8c53346002db";
+        const citySelect = document.getElementById("citySelect");
+        const result = document.getElementById("result");
+        const weatherImage = document.getElementById("weatherImage");
+
+        //  Load country list from API
+        async function loadCountries() {
+            try {
+                const res = await fetch("https://restcountries.com/v3.1/all");
+                const countries = await res.json();
+
+                countries.forEach(country => {
+                    if (!country.latlng) return; // Skip if location is missing
+
+                    const lat = country.latlng[0]; // Latitude
+                    const lon = country.latlng[1]; // Longitude
+                    const name = country.name.common; // Country name
+
+                    const option = document.createElement("option");
+                    option.value = `${lat},${lon}`;
+                    option.textContent = name;
+                    citySelect.appendChild(option);
+                });
+            } catch (error) {
+                result.innerHTML = "Failed to load countries.";
+                result.style.color = "red";
+            }
+        }
+
+        //  Get weather when a country is selected
+        async function checkWeather() {
+            const value = citySelect.value;
+
+            if (!value) {
+                result.innerHTML = "Please select a country.";
+                weatherImage.style.display = "none";
+                return;
+            }
+
+            const [lat, lon] = value.split(",");
+
+            const url = `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&units=metric&appid=${apiKey}`;
+
+            try {
+                const res = await fetch(url);
+                const data = await res.json();
+
+                if (data.cod !== 200) {
+                    result.innerHTML = "Error: " + data.message;
+                    result.style.color = "red";
+                    weatherImage.style.display = "none";
+                    return;
+                }
+                const tempC = data.main.temp;
+                const tempF = (tempC * 9 / 5 + 32).toFixed(1);
+                const temp = data.main.temp;
+                const description = data.weather[0].description;
+                const icon = data.weather[0].icon;
+                const countryName = citySelect.options[citySelect.selectedIndex].text;
+
+                result.innerHTML = `${countryName}: ${temp}°C / ${tempF}°F`;
+                weather.innerHTML = `${description}`;
+                result.style.color = "black";
+                weatherImage.src = `https://openweathermap.org/img/wn/${icon}@4x.png`;
+                weatherImage.style.filter = "drop-shadow(0 0 5px #000)";
+                weatherImage.style.display = "block";
+
+            } catch (error) {
+                result.innerHTML = "Failed to fetch weather data.";
+                result.style.color = "red";
+                weatherImage.style.display = "none";
+            }
+        }
+
+        loadCountries();
+    </script>
+
+
+
+</body>
+
+</html>
