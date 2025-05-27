@@ -5,6 +5,7 @@ const weatherImage = document.getElementById("weatherImage");
 const weather = document.getElementById("weather");
 
 
+
 import { getWeatherSuggestion } from "./suggestions.js"; // Make sure script type="module"
 
 
@@ -39,6 +40,8 @@ async function checkWeather() {
     if (!value) {
         result.innerHTML = "Please select a country.";
         weatherImage.style.display = "none";
+        result.innerHTML = "";
+        weather.innerHTML = "";
         return;
     }
 
